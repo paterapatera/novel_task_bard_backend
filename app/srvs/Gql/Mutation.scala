@@ -5,9 +5,12 @@ import domains.Task
 import domains.Title
 import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcBackend
+import scala.concurrent.ExecutionContext
 
 class Mutation(
     db: JdbcBackend#DatabaseDef
+)(implicit
+    ec: ExecutionContext
 ) {
   val taskRepo = Task.tasks
   val tagRepo = Tag.tags
@@ -17,6 +20,13 @@ class Mutation(
   def saveTask(task: Task.Task) = {
     db.run(taskRepo.insertOrUpdate(task))
     task
+  }
+
+  @GraphQLField
+  def saveTasks(titleId: String, tasks: Seq[Task.Task]) = {
+    db.run(taskRepo.filter(_.titleId === titleId).delete)
+      .flatMap(i => db.run(taskRepo ++= tasks))
+    titleId
   }
 
   @GraphQLField

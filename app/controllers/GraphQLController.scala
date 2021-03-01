@@ -34,7 +34,7 @@ class GraphQLController @Inject() (
     with HasDatabaseConfigProvider[JdbcProfile] {
 
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok("")
+    Ok(SchemaRenderer.renderSchema(Schema(Gql.MutationObject.MutationType)))
   }
 
   def gql() = Action.async(parse.json) { implicit request =>
