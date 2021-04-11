@@ -23,6 +23,7 @@ import domains.Title._
 import srvs.Gql
 import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcProfile
+import scalaz.Scalaz._
 
 @Singleton
 class GraphQLController @Inject() (
@@ -48,7 +49,7 @@ class GraphQLController @Inject() (
             ),
             query,
             Gql.Ctx(query = new Gql.Query(db), mutation = new Gql.Mutation(db)),
-            variables = variablesToJson(request) getOrElse Json.obj(),
+            variables = variablesToJson(request) | Json.obj(),
             operationName = (request.body \ "operationName").asOpt[String]
           )
           .map(Ok(_))
@@ -77,7 +78,7 @@ class GraphQLController @Inject() (
     else Json.parse(variables).as[JsObject]
 
   val variablesToJson = (request: Request[JsValue]) =>
-    (request.body \ "variables").toOption.flatMap {
+    (request.body \ "variables").toOption >>= {
       case JsString(vars) => Some(parseVariables(vars))
       case obj: JsObject  => Some(obj)
       case _              => None

@@ -5,6 +5,7 @@ import domains.Task
 import domains.Title
 import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcBackend
+import scalaz.Scalaz._
 
 class Query(
     db: JdbcBackend#DatabaseDef
@@ -15,17 +16,17 @@ class Query(
 
   @GraphQLField
   def tasks(titleId: String) = {
-    db.run(taskRepo.filter(_.titleId === titleId).result)
+    taskRepo.filter(_.titleId === titleId).result |> db.run
   }
 
   @GraphQLField
-  def titles() = { db.run(titleRepo.result) }
+  def titles() = { titleRepo.result |> db.run }
 
   @GraphQLField
   def title(id: String) = {
-    db.run(titleRepo.filter(_.id === id).result.headOption)
+    titleRepo.filter(_.id === id).result.headOption |> db.run
   }
 
   @GraphQLField
-  def tags() = { db.run(tagRepo.result) }
+  def tags() = { tagRepo.result |> db.run }
 }

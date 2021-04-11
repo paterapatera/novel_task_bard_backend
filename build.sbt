@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.200",
   "com.typesafe.slick" %% "slick-codegen" % "3.3.3"
 )
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.3.3"
 
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.ntbb.controllers._"

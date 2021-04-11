@@ -6,6 +6,7 @@ import domains.Title
 import slick.jdbc.H2Profile.api._
 import slick.jdbc.JdbcBackend
 import scala.concurrent.ExecutionContext
+import scalaz.Scalaz._
 
 class Mutation(
     db: JdbcBackend#DatabaseDef
@@ -18,44 +19,45 @@ class Mutation(
 
   @GraphQLField
   def saveTask(task: Task.Task) = {
-    db.run(taskRepo.insertOrUpdate(task))
+    task |> taskRepo.insertOrUpdate |> db.run
     task
   }
 
   @GraphQLField
   def saveTasks(titleId: String, tasks: Seq[Task.Task]) = {
-    db.run(taskRepo.filter(_.titleId === titleId).delete)
-      .flatMap(i => db.run(taskRepo ++= tasks))
+    val deleteProc = taskRepo.filter(_.titleId === titleId).delete |> db.run
+    val insertProc = (taskRepo ++= tasks) |> db.run
+    deleteProc >>= (_ => insertProc)
     titleId
   }
 
   @GraphQLField
   def saveTitle(title: Title.Title) = {
-    db.run(titleRepo.insertOrUpdate(title))
+    title |> titleRepo.insertOrUpdate |> db.run
     title
   }
 
   @GraphQLField
   def saveTag(tag: Tag.Tag) = {
-    db.run(tagRepo.insertOrUpdate(tag))
+    tag |> tagRepo.insertOrUpdate |> db.run
     tag
   }
 
   @GraphQLField
   def deleteTask(id: String) = {
-    db.run(taskRepo.filter(_.id === id).delete)
+    taskRepo.filter(_.id === id).delete |> db.run
     id
   }
 
   @GraphQLField
   def deleteTitle(id: String) = {
-    db.run(titleRepo.filter(_.id === id).delete)
+    titleRepo.filter(_.id === id).delete |> db.run
     id
   }
 
   @GraphQLField
   def deleteTag(id: String) = {
-    db.run(tagRepo.filter(_.id === id).delete)
+    tagRepo.filter(_.id === id).delete |> db.run
     id
   }
 }
